@@ -11,12 +11,12 @@
 
 int main() {
     unsigned N;
-    if (1 != scanf("%d", &N)) {
+    if (1 != scanf("%u", &N)) {
         fprintf(stderr, "Can't read the number of elements from stdin\n");
         return 1;
     }
 
-    long long max = LLONG_MAX;
+    long long max = LLONG_MIN;
     unsigned max_cnt = 0;
 
     while (0 != N) {
@@ -25,10 +25,17 @@ int main() {
             fprintf(stderr, "Not enought integer numbers in stdin to read\n");
             return 1;
         }
-        if (tmp == max) { ++max_cnt; continue; }
-        if (tmp > max) {max_cnt = 0; continue; }
+        if (tmp == max)
+            ++max_cnt;
+        else if (tmp > max) {
+            max = tmp;
+            max_cnt = 1;
+        }
+
         --N;
     }
+
+    printf("%d", max_cnt);
 
     return 0;
 }
