@@ -29,25 +29,53 @@ bool char_stack_push(char_stack_t *stack, char ch);
 #include <ctype.h>
 
 int main() {
-    char_stack_t stack = char_stack_make(16);
-    printf("%d ", char_stack_is_valid(&stack));
-    printf("%d\n", char_stack_is_empty(&stack));
-    printf("%d ", char_stack_push(&stack, 'a'));
-    printf("%d ", char_stack_push(&stack, 'b'));
-    printf("%d\n", char_stack_push(&stack, 'c'));
-
-    printf("%c ", char_stack_top(&stack));
-    while (!char_stack_is_empty(&stack)) {
-        printf("%c ", char_stack_pop(&stack));
+    char next_symbol;
+    int scanf_res;
+    char_stack_t op_stack = char_stack_make(16);
+    if (!char_stack_is_valid(&op_stack)) {
+        printf("Stack allocation error. Application terminated\n");
+        return -1;
     }
-    printf("\n");
 
-    printf("%d ", char_stack_is_empty(&stack));
-    printf("%d\n", char_stack_is_valid(&stack));
+    while (1 == (scanf_res = scanf("%c",&next_symbol)) && '\n' != next_symbol) {
+        if (' ' == next_symbol) { continue; }
+        if (isdigit(next_symbol)) { printf("%c", next_symbol); continue; }
+        if ('&' == next_symbol) { 
+            if(!char_stack_push(&op_stack, next_symbol)) {
+                printf("Stack push error. Application terminated\n");
+                return -1;
+            }
+            printf(" ");
+            continue;
+        }
+        if ('^' == next_symbol) {
+            while (!char_stack_is_empty(&op_stack) && '&' == char_stack_top(&op_stack))
+                printf("%c", char_stack_pop(&op_stack));
+            if (!char_stack_push(&op_stack, '^')) {
+                 printf("Stack push error. Application terminated\n");
+                return -1;
+            }
+            printf(" ");
+            continue;
+        }
+        if ('|' == next_symbol) {
+            while (!char_stack_is_empty(&op_stack) && ('&' == char_stack_top(&op_stack) || '^' == char_stack_top(&op_stack)))
+                printf("%c", char_stack_pop(&op_stack));
+            if (!char_stack_push(&op_stack, '|')) {
+                 printf("Stack push error. Application terminated\n");
+                return -1;
+            }
+            printf(" ");
+            continue;
+        }
+        printf("Unexpected symbol. Application terminated\n");
+        return -1;
+    }
+    while (!char_stack_is_empty(&op_stack))
+        printf("%c", char_stack_pop(&op_stack));
 
+    char_stack_delete(&op_stack);
 
-    char_stack_delete(&stack);
-    printf("%d\n", char_stack_is_valid(&stack));
     return 0;
 }
 
