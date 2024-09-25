@@ -1,0 +1,3 @@
+bin/**
+!bin/.hold
+*.txt
