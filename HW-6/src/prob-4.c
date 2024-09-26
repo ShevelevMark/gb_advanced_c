@@ -19,6 +19,65 @@ typedef struct word_list {
 } word_list_t;
 
 /**
+ * Основная функция задания: удаляет нечётные элементы.
+ * Первый элемент считается чётным.
+ * Функция рекурсивно делит список на стек смыкния и стек удаления.
+ * При сворачивании стека чётные элементы зацепляются в новый список,
+ * а нечётные удаляются.
+ * Чётные элементы после смыканию сохраняют оригинальный порядок. 
+ * 
+ * @param wl word_list_t* - указатель на первый элемент списка, либо NULL
+ * @return word_list_t* - возвращает голову нового списка, либо NULL, если изначальный список пуст
+ * **/
+word_list_t* word_list_remove_odd(word_list_t *wl) {
+    if (NULL == wl || NULL == wl->next) return wl;
+    word_list_t *tmp = wl->next;
+    wl->next = word_list_remove_odd(wl->next->next);
+    free(tmp);
+    return wl;
+}
+
+/**
+ * Функция рекурсивного разворота списка.
+ * 
+ * @param given word_list_t*    - голова оригинального списка
+ * @param reversed word_list_t* - голова развёрнутого списка
+ * @return word_list_t* - голова развёрнутого списка, либо NULL, если оригинальный список пуст
+ * **/
+word_list_t* word_list_reverse(word_list_t *given, word_list_t *reversed) {
+    if (NULL == given) return reversed;
+    word_list_t *tmp = given->next;
+    given->next = reversed;
+    return word_list_reverse(tmp, given);
+}
+
+/**
+ * Эти дополнительные функции взяты из первой задачи.
+ * Их код расположен после функции main. 
+ * **/
+word_list_t* word_list_push_front(word_list_t*, char const*); // добавляем пару в начало спика
+void word_list_delete(word_list_t*);                          // удаляем список
+word_list_t* read_words(int *errcode);                        // читаем слова из stdin
+
+int main() {
+    int errcode = 0;
+    word_list_t* wl = read_words(&errcode);
+    if (0 != errcode) {
+        printf("Error with words reading: %d\n", errcode);
+        return 1;
+    }
+    wl = word_list_reverse(wl, NULL); // список прочитан в обратном порядке, потому мы сначала разворачиваем его в прямой порядок
+    wl = word_list_remove_odd(wl);
+
+    for (word_list_t *it = wl; it != NULL; it = it->next)
+        printf("%s ", it->word);
+    printf("\n");
+
+    word_list_delete(wl);
+    return 0;
+}
+
+/**
  * Функция добавляет элемент перед головой списка.
  * Функция выделяет память на одну списочную пару и
  * на строку в одном блоке. 
@@ -120,37 +179,4 @@ word_list_t* read_words(int *errcode) {
 ERROR: // до этой метки нельзя дойти если всё хорошо
     word_list_delete(wl);
     return NULL;
-}
-
-/**
- * Функция рекурсивного разворота списка.
- * 
- * @param given word_list_t*    - голова оригинального списка
- * @param reversed word_list_t* - голова развёрнутого списка
- * @return word_list_t* - голова развёрнутого списка, либо NULL, если оригинальный список пуст
- * **/
-word_list_t* word_list_reverse(word_list_t *given, word_list_t *reversed) {
-    if (NULL == given) return reversed;
-    word_list_t *tmp = given->next;
-    given->next = reversed;
-    return word_list_reverse(tmp, given);
-}
-
-/**
- * Основная функция задания: удаляет нечётные элементы.
- * Первый элемент считается чётным.
- * Функция рекурсивно делит список на стек смыкния и стек удаления.
- * При сворачивании стека чётные элементы зацепляются в новый список,
- * а нечётные удаляются.
- * Чётные элементы после смыканию сохраняют оригинальный порядок. 
- * 
- * @param wl word_list_t* - указатель на первый элемент списка, либо NULL
- * @return word_list_t* - возвращает голову нового списка, либо NULL, если изначальный список пуст
- * **/
-word_list_t* word_list_remove_odd(word_list_t *wl) {
-    if (NULL == wl || NULL == wl->next) return wl;
-    word_list_t *tmp = wl->next;
-    wl->next = word_list_remove_odd(wl->next->next);
-    free(tmp);
-    return wl;
 }
